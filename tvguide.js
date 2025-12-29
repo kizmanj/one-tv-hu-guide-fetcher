@@ -34,7 +34,7 @@ const getProgram = async () => {
                 "#text": ch.editorial?.longName
             },
             "icon": {
-                "@src": "https://imageservice.production4ig.opentv.com/images/v1/image/channel/" + ch.e + "/logo?aspect=16x9&height=32&imageFormat=webp"
+                "@src": "https://imageservice.production4ig.opentv.com/images/v1/image/channel/" + ch.e + "/logo?aspect=16x9&height=32&imageFormat=png"
             }
         });
         for (let d = 0; d < forDays; d++) {
