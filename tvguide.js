@@ -10,22 +10,18 @@ let accessToken = "";
 let tzoffset = moment.tz('Europe/Budapest').utcOffset();
 
 login(process.env.ONE_TV_USER, process.env.ONE_TV_PASSWORD)
-.then(async (loginResponse) => {
-    //console.log("Login response: ", loginResponse);
-    accessToken = loginResponse.access_token;
-    await getProgram();
-});
+    .then(async (loginResponse) => {
+        //console.log("Login response: ", loginResponse);
+        accessToken = loginResponse.access_token;
+        await getProgram();
+    });
 
-const getProgram = async () => {
+const getProgram = async (forDays = 3) => {
     const channelList = await getChannelList(accessToken);
-    const forDays = 3; // days
     const channels = [];
     const programme = [];
     //console.log(channelIdList);
     //console.log(channelIdList.length);
-    /*let ch = {
-	e: "MediaPressTV_155"
-    };*/
     for (let ch of channelList.services) {
         channels.push({
             "@id": ch.e,
@@ -44,10 +40,10 @@ const getProgram = async () => {
             console.log("Program length for channel " + ch.e + " on date " + date + ": " + program.length);
             //console.log(program.length);
             for (let prg of program) {
-		const prgType = prg.editorial.contentType != "movie" ? "episode" : "movie";
-		const prog = {
-//                    "@start": moment(prg.airingStartTime * 1000).add(tzoffset / 60, 'hours').format('YYYYMMDDHHmmss ZZ'),
-//                    "@stop": moment(prg.airingEndTime * 1000).add(tzoffset / 60, 'hours').format('YYYYMMDDHHmmss ZZ'),
+                const prgType = prg.editorial.contentType != "movie" ? "episode" : "movie";
+                const prog = {
+                    //                    "@start": moment(prg.airingStartTime * 1000).add(tzoffset / 60, 'hours').format('YYYYMMDDHHmmss ZZ'),
+                    //                    "@stop": moment(prg.airingEndTime * 1000).add(tzoffset / 60, 'hours').format('YYYYMMDDHHmmss ZZ'),
                     "@start": moment(prg.airingStartTime * 1000).format('YYYYMMDDHHmmss ZZ'),
                     "@stop": moment(prg.airingEndTime * 1000).format('YYYYMMDDHHmmss ZZ'),
                     "@channel": prg.serviceRef,
@@ -60,29 +56,29 @@ const getProgram = async () => {
                         "#text": prg.Description ? prg.Description : ""
                     },
                     "icon": [
-                         {
-                             "@src": "https://imageservice.production4ig.opentv.com/images/v1/image/" + prgType + "/" + prg.id + "/" +
-                                      (prgType == "episode" ? "episode" : "contentimage") +
-                                      "?aspect=16x9&imageFormat=webp&width=320"
-                         }
+                        {
+                            "@src": "https://imageservice.production4ig.opentv.com/images/v1/image/" + prgType + "/" + prg.id + "/" +
+                                (prgType == "episode" ? "episode" : "contentimage") +
+                                "?aspect=16x9&imageFormat=webp&width=320"
+                        }
                     ]
                 };
-		if (prg.SeasonNumber && prg.EpisodeNumber) {
-                            prog['episode-num'] =  [
-                                {
-                                    '@system': 'onscreen',
-                                    '#text': 'S'+prg.SeasonNumber+'E'+prg.EpisodeNumber
-                                }
-                            ]
-                            if (prg.Episode) {
-                                prog['sub-title'] =  [
-                                    {
-                                        '@lang': 'hu',
-                                        '#text': prg.Episode
-                                    }
-                                ]
-                            }
+                if (prg.SeasonNumber && prg.EpisodeNumber) {
+                    prog['episode-num'] = [
+                        {
+                            '@system': 'onscreen',
+                            '#text': 'S' + prg.SeasonNumber + 'E' + prg.EpisodeNumber
                         }
+                    ]
+                    if (prg.Episode) {
+                        prog['sub-title'] = [
+                            {
+                                '@lang': 'hu',
+                                '#text': prg.Episode
+                            }
+                        ]
+                    }
+                }
 
                 programme.push(prog);
             }
